@@ -18,16 +18,10 @@ jobs:
     - name: Install Python 2.7 via pyenv
       run: |
         curl https://pyenv.run | bash
-        echo 'export PATH="$HOME/.pyenv/bin:$PATH"' >> $GITHUB_ENV
-        echo 'eval "$(pyenv init --path)"' >> $GITHUB_ENV
-        echo 'eval "$(pyenv init -)"' >> $GITHUB_ENV
-        echo 'eval "$(pyenv virtualenv-init -)"' >> $GITHUB_ENV
         export PATH="$HOME/.pyenv/bin:$PATH"
-        eval "$(pyenv init --path)"
-        eval "$(pyenv init -)"
+        eval "$(~/.pyenv/bin/pyenv init -)"
         pyenv install 2.7.18
         pyenv global 2.7.18
-        ln -sf ~/.pyenv/versions/2.7.18/bin/python ~/.pyenv/versions/2.7.18/bin/python2
         sudo ln -sf ~/.pyenv/versions/2.7.18/bin/python /usr/bin/python
 
     - name: Clone OpenWRT source
