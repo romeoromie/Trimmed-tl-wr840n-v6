@@ -8,6 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PROFILE: tplink_tl-wr840n-v6
+      PACKAGES: wpad-basic-mbedtls curl bash coreutils -luci -ppp -ip6tables -odhcpd-ipv6only -opkg -uhttpd -firewall4
+
     steps:
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -26,15 +30,20 @@ jobs:
     - name: Build firmware
       run: |
         cd imagebuilder
-        source ../imagebuilder.config
         make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
 
-    - name: Upload firmware
+    - name: Upload firmware artifact
       uses: actions/upload-artifact@v4
       with:
         name: openwrt-firmware
         path: imagebuilder/bin/targets/ramips/mt76x8/*.bin
 
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0
+        name: Trimmed OpenWRT TL-WR840N v6.2
+        files: imagebuilder/bin/targets/ramips/mt76x8/*.bin
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
