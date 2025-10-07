@@ -23,9 +23,14 @@ jobs:
 
     - name: Download Image Builder
       run: |
-        wget https://downloads.openwrt.org/releases/23.05.3/targets/ramips/mt76x8/openwrt-imagebuilder-23.05.3-ramips-mt76x8.Linux-x86_64.tar.xz
+        wget https://downloads.openwrt.org/releases/22.03.5/targets/ramips/mt76x8/openwrt-imagebuilder-22.03.5-ramips-mt76x8.Linux-x86_64.tar.xz
         tar -xf openwrt-imagebuilder-*.tar.xz
         mv openwrt-imagebuilder-*/ imagebuilder/
+
+    - name: Confirm profile exists
+      run: |
+        cd imagebuilder
+        make info | grep $PROFILE
 
     - name: Build firmware
       run: |
