@@ -2,78 +2,33 @@ name: Build OpenWRT Firmware (19.07.10)
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
-    env:
-      # Set this after you see the profile list; leave as-is for the first run
-      PROFILE: tl-wr841n-v13
-      PACKAGES: wpad-basic curl bash coreutils -luci -ppp -ip6tables -odhcpd-ipv6only -opkg -uhttpd -firewall
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends \
-            build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3 ca-certificates file
+    - name: Download ImageBuilder
+      run: |
+        wget https://downloads.openwrt.org/releases/19.07.10/targets/ar71xx/generic/openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64.tar.xz
+        tar -xf openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64.tar.xz
 
-      - name: Download Image Builder 19.07.10
-        shell: bash
-        run: |
-          set -euo pipefail
-          IB_URL="https://downloads.openwrt.org/releases/19.07.10/targets/ramips/mt76x8/openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz"
-          wget -q "$IB_URL"
-          tar -xf "$(basename "$IB_URL")"
-          mv openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64 imagebuilder
+    - name: Build sysupgrade image for TL-WR840N v6.2
+      working-directory: openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64
+      run: |
+        make image PROFILE=tl-wr840n-v6 \
+          PACKAGES="uhttpd php7 php7-cgi php7-mod-session php7-mod-mysqli php7-mod-json php7-mod-curl \
+                    iptables ipset dnsmasq-full wpad-basic kmod-nf-nat kmod-ipt-nat kmod-ipt-conntrack \
+                    coreutils busybox dropbear" \
+          FILES=files/
 
-      - name: Dump full profile list to artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd imagebuilder
-          make info > ../profiles.txt
-        continue-on-error: true
-
-      - name: Upload profile list
-        uses: actions/upload-artifact@v4
-        with:
-          name: imagebuilder-profiles
-          path: profiles.txt
-
-      - name: Build firmware only if profile exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          cd imagebuilder
-          # Extract just the profile names (first column of make info)
-          make info | awk '{print $1}' > ../profiles_only.txt || true
-          if grep -Fxq "$PROFILE" ../profiles_only.txt; then
-            echo "Profile found: $PROFILE"
-            echo "Building with PACKAGES: $PACKAGES"
-            make image PROFILE="$PROFILE" PACKAGES="$PACKAGES" FORCE=1
-          else
-            echo "Profile not found: $PROFILE"
-            echo "Tip: Inspect the artifact 'imagebuilder-profiles' and set env.PROFILE to an exact match."
-            echo "Common candidates for WR840N v6: tl-wr841n-v13, tl-wr840n-v4 (depending on builder)."
-            exit 0
-          fi
-
-      - name: Upload firmware artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: openwrt-firmware
-          path: |
-            imagebuilder/bin/targets/ramips/mt76x8/*.bin
-          if-no-files-found: ignore
+    - name: Upload sysupgrade image
+      uses: actions/upload-artifact@v3
+      with:
+        name: sysupgrade-image
+        path: openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64/bin/targets/ar71xx/generic/*-sysupgrade.bin
