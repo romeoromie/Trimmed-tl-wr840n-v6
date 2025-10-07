@@ -62,4 +62,18 @@ jobs:
       with:
         tag_name: v1.0
         name: Trimmed OpenWRT TL-WR840N v6.2
+        files: imagebuilder/bin/targets/ramips/mt76x8/*.bin        cd imagebuilder
+        make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
+
+    - name: Upload firmware artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openwrt-firmware
+        path: imagebuilder/bin/targets/ramips/mt76x8/*.bin
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0
+        name: Trimmed OpenWRT TL-WR840N v6.2
         files: imagebuilder/bin/targets/ramips/mt76x8/*.bin
