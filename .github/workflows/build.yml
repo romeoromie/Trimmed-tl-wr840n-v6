@@ -21,7 +21,7 @@ jobs:
     - name: Build sysupgrade image for TL-WR840N v6.2
       working-directory: openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64
       run: |
-        make image PROFILE=tl-wr840n-v5 \
+        make image PROFILE=tplink_tl-wr840n-v6 \
           PACKAGES="uhttpd php7 php7-cgi php7-mod-session php7-mod-mysqli php7-mod-json php7-mod-curl \
                     iptables ipset dnsmasq-full wpad-basic kmod-nf-nat kmod-ipt-nat kmod-ipt-conntrack \
                     coreutils busybox dropbear" \
