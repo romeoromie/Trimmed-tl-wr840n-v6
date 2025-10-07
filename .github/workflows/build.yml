@@ -13,7 +13,8 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt update
-        sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget python3
+        sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget python2
+        sudo ln -sf /usr/bin/python2 /usr/bin/python
 
     - name: Clone OpenWRT source
       run: |
@@ -32,6 +33,11 @@ jobs:
       run: |
         echo -e "CONFIG_TARGET_ramips=y\nCONFIG_TARGET_ramips_mt76x8=y\nCONFIG_TARGET_ramips_mt76x8_DEVICE_tl-wr840n-v6=y" > .config
         make defconfig
+
+    - name: Add custom files (optional)
+      working-directory: openwrt
+      run: |
+        if [ -d ../files ]; then cp -r ../files ./files; fi
 
     - name: Build firmware
       working-directory: openwrt
