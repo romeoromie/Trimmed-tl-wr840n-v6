@@ -24,8 +24,8 @@ jobs:
     - name: Download Image Builder
       run: |
         wget https://downloads.openwrt.org/releases/22.03.5/targets/ramips/mt76x8/openwrt-imagebuilder-22.03.5-ramips-mt76x8.Linux-x86_64.tar.xz
-        tar -xf openwrt-imagebuilder-*.tar.xz
-        mv openwrt-imagebuilder-*/ imagebuilder/
+        tar -xf openwrt-imagebuilder-22.03.5-ramips-mt76x8.Linux-x86_64.tar.xz
+        mv openwrt-imagebuilder-22.03.5-ramips-mt76x8.Linux-x86_64 imagebuilder
 
     - name: Confirm profile exists
       run: |
@@ -35,6 +35,20 @@ jobs:
     - name: Build firmware
       run: |
         cd imagebuilder
+        make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
+
+    - name: Upload firmware artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: openwrt-firmware
+        path: imagebuilder/bin/targets/ramips/mt76x8/*.bin
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0
+        name: Trimmed OpenWRT TL-WR840N v6.2
+        files: imagebuilder/bin/targets/ramips/mt76x8/*.bin        cd imagebuilder
         make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
 
     - name: Upload firmware artifact
