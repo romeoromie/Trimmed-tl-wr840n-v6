@@ -20,12 +20,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dependencies (with Python 2)
+      - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3 python2
-          # Ensure "python" points to python2 for legacy scripts
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          sudo apt install -y build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3
 
       - name: Download Image Builder 19.07.10
         run: |
@@ -36,29 +34,4 @@ jobs:
       - name: List available profiles
         run: |
           cd imagebuilder
-          make info | grep -i wr84 || true
-
-      - name: Build firmware
-        run: |
-          cd imagebuilder
-          make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
-
-      - name: Upload firmware artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: openwrt-firmware
-          path: imagebuilder/bin/targets/ramips/mt76x8/*.bin
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v19.07.10
-          name: Trimmed OpenWRT TL-WR840N v6 (19.07.10)
-          body: |
-            Auto-built via GitHub Actions (Image Builder 19.07.10, ramips/mt76x8).
-            Profile: ${{ env.PROFILE }}
-            Packages: ${{ env.PACKAGES }}
-          files: |
-            imagebuilder/bin/targets/ramips/mt76x8/*.bin
+          make info | grep -i wr84 ||
