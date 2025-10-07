@@ -1,4 +1,4 @@
-name: Build OpenWRT Firmware (19.07.10)
+name: Native OpenWRT Build (TL-WR840N v6.2)
 
 on:
   push:
@@ -10,29 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Download ImageBuilder
+    - name: Install dependencies
       run: |
-        wget https://downloads.openwrt.org/releases/19.07.10/targets/ramips/mt76x8/openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz
-        tar -xf openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz
+        sudo apt update
+        sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget python3
 
-    - name: List available profiles (debug aid)
-      working-directory: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64
-      run: make info
-
-    - name: Build sysupgrade image for TL-WR840N v6.2
-      working-directory: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64
+    - name: Clone OpenWRT source
       run: |
-        make image PROFILE=tl-wr840n-v6 \
-          PACKAGES="uhttpd php7 php7-cgi php7-mod-session php7-mod-mysqli php7-mod-json php7-mod-curl \
-                    iptables ipset dnsmasq-full wpad-basic kmod-nf-nat kmod-ipt-nat kmod-ipt-conntrack \
-                    coreutils busybox dropbear" \
-          FILES=files/
+        git clone https://git.openwrt.org/openwrt/openwrt.git
+        cd openwrt
+        git checkout v19.07.10
+
+    - name: Prepare feeds
+      working-directory: openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+
+    - name: Configure build
+      working-directory: openwrt
+      run: |
+        echo -e "CONFIG_TARGET_ramips=y\nCONFIG_TARGET_ramips_mt76x8=y\nCONFIG_TARGET_ramips_mt76x8_DEVICE_tl-wr840n-v6=y" > .config
+        make defconfig
+
+    - name: Build firmware
+      working-directory: openwrt
+      run: make -j$(nproc)
 
     - name: Upload sysupgrade image
       uses: actions/upload-artifact@v4
       with:
         name: sysupgrade-image
-        path: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64/bin/targets/ramips/mt76x8/*-sysupgrade.bin
+        path: openwrt/bin/targets/ramips/mt76x8/*-sysupgrade.bin
