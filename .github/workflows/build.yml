@@ -14,13 +14,15 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget curl \
-          libbz2-dev libreadline-dev libsqlite3-dev zlib1g-dev libffi-dev liblzma-dev
+          libbz2-dev libreadline-dev libsqlite3-dev zlib1g-dev libffi-dev liblzma-dev \
+          flex bison libtool autoconf automake perl
 
     - name: Install Python 2.7 via pyenv
       run: |
         curl https://pyenv.run | bash
         export PATH="$HOME/.pyenv/bin:$PATH"
-        eval "$(~/.pyenv/bin/pyenv init -)"
+        export PYENV_ROOT="$HOME/.pyenv"
+        eval "$($PYENV_ROOT/bin/pyenv init -)"
         pyenv install 2.7.18
         pyenv global 2.7.18
         sudo ln -sf ~/.pyenv/versions/2.7.18/bin/python /usr/bin/python
@@ -51,30 +53,9 @@ jobs:
     - name: Build tools and firmware
       working-directory: openwrt
       run: |
-        make tools/install -j$(nproc)
+        make tools/install -j1 V=s
         make toolchain/install -j$(nproc)
         make -j1 V=s
-
-    - name: Upload sysupgrade image
-      uses: actions/upload-artifact@v4
-      with:
-        name: sysupgrade-image
-        path: openwrt/bin/targets/ramips/mt76x8/*-sysupgrade.bin        ./scripts/feeds install -a
-
-    - name: Configure build
-      working-directory: openwrt
-      run: |
-        echo -e "CONFIG_TARGET_ramips=y\nCONFIG_TARGET_ramips_mt76x8=y\nCONFIG_TARGET_ramips_mt76x8_DEVICE_tl-wr840n-v6=y" > .config
-        make defconfig
-
-    - name: Add custom files (optional)
-      working-directory: openwrt
-      run: |
-        if [ -d ../files ]; then cp -r ../files ./files; fi
-
-    - name: Build firmware
-      working-directory: openwrt
-      run: make -j$(nproc)
 
     - name: Upload sysupgrade image
       uses: actions/upload-artifact@v4
