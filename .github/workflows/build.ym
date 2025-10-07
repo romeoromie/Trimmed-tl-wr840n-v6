@@ -1,0 +1,36 @@
+name: Build OpenWRT Firmware
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3
+
+    - name: Download Image Builder
+      run: |
+        wget https://downloads.openwrt.org/releases/23.05.3/targets/ramips/mt76x8/openwrt-imagebuilder-23.05.3-ramips-mt76x8.Linux-x86_64.tar.xz
+        tar -xf openwrt-imagebuilder-*.tar.xz
+        mv openwrt-imagebuilder-*/ imagebuilder/
+
+    - name: Build firmware
+      run: |
+        cd imagebuilder
+        source ../imagebuilder.config
+        make image PROFILE=$PROFILE PACKAGES="$PACKAGES"
+
+    - name: Upload firmware
+      uses: actions/upload-artifact@v3
+      with:
+        name: openwrt-firmware
+        path: imagebuilder/bin/targets/ramips/mt76x8/*.bin
