@@ -15,17 +15,7 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget curl \
           libbz2-dev libreadline-dev libsqlite3-dev zlib1g-dev libffi-dev liblzma-dev \
-          flex bison libtool autoconf automake perl
-
-    - name: Install Python 2.7 via pyenv
-      run: |
-        curl https://pyenv.run | bash
-        export PATH="$HOME/.pyenv/bin:$PATH"
-        export PYENV_ROOT="$HOME/.pyenv"
-        eval "$($PYENV_ROOT/bin/pyenv init -)"
-        pyenv install 2.7.18
-        pyenv global 2.7.18
-        sudo ln -sf ~/.pyenv/versions/2.7.18/bin/python /usr/bin/python
+          flex bison libtool autoconf automake perl python-is-python2
 
     - name: Clone OpenWRT source
       run: |
@@ -53,12 +43,8 @@ jobs:
     - name: Build tools and firmware
       working-directory: openwrt
       run: |
-        make tools/install -j1 V=s
-        make toolchain/install -j$(nproc)
-        make -j1 V=s
+        make tools/install V=s
+        make toolchain/install V=s
+        make -j$(nproc) V=s
 
-    - name: Upload sysupgrade image
-      uses: actions/upload-artifact@v4
-      with:
-        name: sysupgrade-image
-        path: openwrt/bin/targets/ramips/mt76x8/*-sysupgrade.bin
+    - name: Upload sys
