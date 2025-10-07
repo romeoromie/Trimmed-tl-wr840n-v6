@@ -12,7 +12,7 @@ jobs:
       contents: write
       actions: write
     env:
-      # Adjust this once you know the exact profile name from "make info"
+      # Adjust this once you know the exact profile from "List available profiles"
       PROFILE: tl-wr841n-v13
       PACKAGES: wpad-basic curl bash coreutils -luci -ppp -ip6tables -odhcpd-ipv6only -opkg -uhttpd -firewall
 
@@ -20,10 +20,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install dependencies (with Python 2)
         run: |
           sudo apt update
-          sudo apt install -y build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3
+          sudo apt install -y build-essential libncurses5-dev zlib1g-dev gawk git wget unzip python3 python2
+          # Ensure "python" points to python2 for legacy scripts
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Download Image Builder 19.07.10
         run: |
@@ -55,4 +57,8 @@ jobs:
           tag_name: v19.07.10
           name: Trimmed OpenWRT TL-WR840N v6 (19.07.10)
           body: |
-            Auto-built via GitHub Actions (Image Builder 19.07.10
+            Auto-built via GitHub Actions (Image Builder 19.07.10, ramips/mt76x8).
+            Profile: ${{ env.PROFILE }}
+            Packages: ${{ env.PACKAGES }}
+          files: |
+            imagebuilder/bin/targets/ramips/mt76x8/*.bin
