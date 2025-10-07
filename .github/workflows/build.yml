@@ -44,9 +44,3 @@ jobs:
         tag_name: v1.0
         name: Trimmed OpenWRT TL-WR840N v6.2
         files: imagebuilder/bin/targets/ramips/mt76x8/*.bin
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: v1.0
-        name: Trimmed OpenWRT TL-WR840N v6.2
-        files: imagebuilder/bin/targets/ramips/mt76x8/*.bin
