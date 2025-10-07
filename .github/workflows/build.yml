@@ -15,15 +15,15 @@ jobs:
 
     - name: Download ImageBuilder
       run: |
-        wget https://downloads.openwrt.org/releases/19.07.10/targets/ar71xx/generic/openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64.tar.xz
-        tar -xf openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64.tar.xz
+        wget https://downloads.openwrt.org/releases/19.07.10/targets/ramips/mt76x8/openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz
+        tar -xf openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz
 
     - name: List available profiles (debug aid)
-      working-directory: openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64
+      working-directory: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64
       run: make info
 
     - name: Build sysupgrade image for TL-WR840N v6.2
-      working-directory: openwrt-imagebuilder-19.07.10-ar71xx-generic.Linux-x86_64
+      working-directory: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64
       run: |
         make image PROFILE=tplink_tl-wr840n-v6.2 \
           PACKAGES="uhttpd php7 php7-cgi php7-mod-session php7-mod-mysqli php7-mod-json php7-mod-curl \
@@ -35,4 +35,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: sysupgrade-image
-        path: openwrt-imagebuilder
+        path: openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64/bin/targets/ramips/mt76x8/*-sysupgrade.bin
