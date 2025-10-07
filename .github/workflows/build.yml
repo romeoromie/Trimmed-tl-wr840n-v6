@@ -15,7 +15,18 @@ jobs:
         sudo apt update
         sudo apt install -y build-essential libncurses5-dev gawk git gettext unzip file libssl-dev wget curl \
           libbz2-dev libreadline-dev libsqlite3-dev zlib1g-dev libffi-dev liblzma-dev \
-          flex bison libtool autoconf automake perl python-is-python2 cmake
+          flex bison libtool autoconf automake perl cmake
+
+    - name: Install Python 2.7 via pyenv
+      run: |
+        curl https://pyenv.run | bash
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        export PATH="$PYENV_ROOT/shims:$PATH"
+        eval "$(pyenv init -)"
+        pyenv install 2.7.18
+        pyenv global 2.7.18
+        sudo ln -sf $PYENV_ROOT/versions/2.7.18/bin/python /usr/bin/python
 
     - name: Clone OpenWRT source
       run: |
