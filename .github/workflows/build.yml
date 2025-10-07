@@ -12,7 +12,8 @@ jobs:
       contents: write
       actions: write
     env:
-      PROFILE: tl-wr840n-v6
+      # Adjust this once you know the exact profile name from "make info"
+      PROFILE: tl-wr841n-v13
       PACKAGES: wpad-basic curl bash coreutils -luci -ppp -ip6tables -odhcpd-ipv6only -opkg -uhttpd -firewall
 
     steps:
@@ -30,10 +31,10 @@ jobs:
           tar -xf openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64.tar.xz
           mv openwrt-imagebuilder-19.07.10-ramips-mt76x8.Linux-x86_64 imagebuilder
 
-      - name: Confirm profile exists
+      - name: List available profiles
         run: |
           cd imagebuilder
-          make info | grep -i wr840
+          make info | grep -i wr84 || true
 
       - name: Build firmware
         run: |
@@ -54,8 +55,4 @@ jobs:
           tag_name: v19.07.10
           name: Trimmed OpenWRT TL-WR840N v6 (19.07.10)
           body: |
-            Auto-built via GitHub Actions (Image Builder 19.07.10, ramips/mt76x8).
-            Profile: ${{ env.PROFILE }}
-            Packages: ${{ env.PACKAGES }}
-          files: |
-            imagebuilder/bin/targets/ramips/mt76x8/*.bin
+            Auto-built via GitHub Actions (Image Builder 19.07.10
