@@ -1,0 +1,26 @@
+--- a/Source/cmWorkerPool.h
++++ b/Source/cmWorkerPool.h
+@@ -33,7 +33,7 @@
+   bool error() const
+   {
+-    return (ExitStatus != 0) || (TermSignal != 0) || !ErrorMessage.empty();
++    return (ExitCode != 0) || (TermSignal != 0) || !ErrorMessage.empty();
+   }
+
+@@ -36,7 +36,7 @@
+-    std::int64_t ExitStatus = 0;
++    int ExitCode = 0;
+
+--- a/Source/cmWorkerPool.cxx
++++ b/Source/cmWorkerPool.cxx
+@@ -303,7 +303,7 @@
+-    proc.Result()->ExitStatus = exitStatus;
++    proc.Result()->ExitCode = exitStatus;
+
+@@ -313,7 +313,7 @@
+-    std::to_string(proc.Result()->ExitStatus);
++    std::to_string(proc.Result()->ExitCode);
+
+@@ -543,7 +543,7 @@
+-  ExitStatus = 0;
++  ExitCode = 0;
